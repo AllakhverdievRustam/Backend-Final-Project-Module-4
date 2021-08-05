@@ -1,4 +1,4 @@
-const Users = require('../../db/models/purchase/Index');
+const Users = require('../../db/models/user/Index');
 
 module.exports.getAllUser = (req, res) => {
   Users.find().then(result => {
@@ -11,8 +11,10 @@ module.exports.createNewUser = (req, res) => {
   const body = req.body;
 
   if (body.hasOwnProperty('login') 
-  && body.hasOwnProperty('password')) {
-    users.save(req.body).then(() => {
+  && body.hasOwnProperty('password')
+  && body.login
+  && body.password) {
+    users.save(body).then(() => {
       Users.find().then(result => {
         res.send({data: result});
       });
