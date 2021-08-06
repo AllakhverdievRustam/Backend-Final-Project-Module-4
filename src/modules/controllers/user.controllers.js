@@ -3,16 +3,16 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
 SECRET_KEY = 'Rustam4ik228322';
-const generateJwt = (password) => {
+const generateJwt = (login, _id) => {
   return jwt.sign(
-    { password },
+    { login, _id },
     SECRET_KEY,
     { expiresIn: '24h' }
   )
 }
 
-module.exports.createNewUser = async (req, res) => {
-  const users = new Users(req.body);
+// Registration
+module.exports.registrationUser = async (req, res) => {
   const body = req.body;
   const { login, password } = body;
 
@@ -22,7 +22,7 @@ module.exports.createNewUser = async (req, res) => {
     && password) {
 
     const candidate = await Users.findOne({ login: body.login });
-    if (candidate) return res.send('Такой пользователь уже существует!');
+    if (candidate) return res.send('This user already exists!');
     
     const hashPassword = await bcrypt.hash(password, 5);
 
@@ -30,11 +30,34 @@ module.exports.createNewUser = async (req, res) => {
 
     newUser.save();
 
-    const token = generateJwt(body.login);
+    const token = generateJwt(newUser.login, newUser._id);
 
     res.send(token);
   } else {
-    res.status(422).send('Введены неверные данные!');
+    res.status(422).send('Invalid data entered!');
+  }
+};
+
+// Authorization
+module.exports.authorizationUser = async (req, res) => {
+  const body = req.body;
+  const { login, password, _id } = body;
+
+  if (body.hasOwnProperty('login')
+    && login
+    && body.hasOwnProperty('password')
+    && password) {
+      const candidate = await Users.findOne({ login });
+      if (!candidate) return res.send('Such user does not exist!');
+      
+      const comparePassword = bcrypt.compareSync(password, candidate.password);
+      if (!comparePassword) return res.send('Wrong password!');
+
+      const token = generateJwt(login, _id);
+      
+      res.send({ token, login: candidate.login, _id: candidate._id });
+  } else {
+    res.status(422).send('Invalid data entered!');
   }
 };
 
@@ -52,6 +75,6 @@ module.exports.deleteUser = (req, res) => {
       res.send('User deleted successfully!');
     });
   } else {
-    res.status(422).send('Введены неверные данные!');
+    res.status(422).send('Invalid data entered!');
   }
 };
