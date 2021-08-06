@@ -49,11 +49,9 @@ module.exports.getAllUser = (req, res) => {
 module.exports.deleteUser = (req, res) => {
   if (req.query._id) {
     Users.deleteOne({ _id: req.query._id }).then(() => {
-      Users.find().then(result => {
-        res.send({ data: result });
-      });
+      res.send('User deleted successfully!');
     });
   } else {
-    res.status(422).send('Error!');
+    res.status(422).send('Введены неверные данные!');
   }
 };
