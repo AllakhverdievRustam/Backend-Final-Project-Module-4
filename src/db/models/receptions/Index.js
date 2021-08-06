@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const receptionsSchema = new Schema ({
   nameUser: String,
-  nameВoctor: String,
+  nameDoctor: String,
   date: String,
   complaint: String
 });
