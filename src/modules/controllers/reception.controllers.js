@@ -18,8 +18,24 @@ module.exports.createNewReception = (req, res) => {
   && body.nameDoctor
   && body.date
   && body.complaint) {
-    reception.save(body).then((result) => {
-      res.send(result);
+    reception.save(body).then(() => {
+      Receptions.find().then(result => {
+        res.send({ data: result });
+      });
+    });
+  } else {
+    res.status(422).send('Invalid data entered!');
+  }
+};
+
+module.exports.editReception = (req, res) => {
+  const body = req.body;
+
+  if (body.hasOwnProperty('_id') && body._id) {
+    Receptions.updateOne({ _id: req.body._id }, req.body).then(() => {
+      Receptions.find().then(result => {
+        res.send({ data: result });
+      });
     });
   } else {
     res.status(422).send('Invalid data entered!');

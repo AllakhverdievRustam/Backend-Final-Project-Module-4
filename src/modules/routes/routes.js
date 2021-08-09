@@ -17,10 +17,12 @@ router.delete('/deleteUser', deleteUser);
 
 const {
   getAllReceptions,
-  createNewReception
+  createNewReception,
+  editReception
 } = require('../controllers/reception.controllers');
 
 router.get('/getAllReceptions', getAllReceptions);
 router.post('/createNewReception', createNewReception);
+router.patch('/editReception', editReception);
 
 module.exports = router;
