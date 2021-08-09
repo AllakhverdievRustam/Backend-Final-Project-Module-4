@@ -41,3 +41,16 @@ module.exports.editReception = (req, res) => {
     res.status(422).send('Invalid data entered!');
   }
 };
+
+module.exports.deleteReception = async (req, res) => {
+  const query = req.query;
+  if (query.hasOwnProperty('_id') && query._id) {
+    Receptions.deleteOne({ _id: query._id }).then(() => {
+      Receptions.find().then(result => {
+        res.send({data: result});
+      });
+    });
+  } else {
+    res.status(422).send('Invalid data entered!');
+  }
+};
