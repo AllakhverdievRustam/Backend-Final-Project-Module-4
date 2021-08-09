@@ -22,7 +22,7 @@ module.exports.registrationUser = async (req, res) => {
     && password) {
 
     const candidate = await Users.findOne({ login: body.login });
-    if (candidate) return res.send('This user already exists!');
+    if (candidate) return res.status(421).send('This user already exists!');
     
     const hashPassword = await bcrypt.hash(password, 5);
 
@@ -48,10 +48,10 @@ module.exports.authorizationUser = async (req, res) => {
     && body.hasOwnProperty('password')
     && password) {
       const candidate = await Users.findOne({ login });
-      if (!candidate) return res.send('Such user does not exist!');
+      if (!candidate) return res.status(420).send('Such user does not exist!');
       
       const comparePassword = bcrypt.compareSync(password, candidate.password);
-      if (!comparePassword) return res.send('Wrong password!');
+      if (!comparePassword) return res.status(421).send('Wrong password!');
 
       const token = generateJwt(login, _id);
       
