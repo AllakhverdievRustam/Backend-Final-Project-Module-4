@@ -6,7 +6,8 @@ const receptionsSchema = new Schema ({
   nameUser: String,
   nameDoctor: String,
   date: String,
-  complaint: String
+  complaint: String,
+  idUser: String
 });
 
 module.exports = Receptions = mongoose.model('receptions', receptionsSchema);
