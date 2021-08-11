@@ -8,7 +8,7 @@ const tokenVerify = (token) => {
 }
 
 module.exports.getAllReceptions = (req, res) => {
-  const tokenParse = tokenVerify(req.headers.token);
+  const tokenParse = tokenVerify(req.headers.authorization);
 
   Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).then(result => {
     res.send({ data: result });
@@ -16,24 +16,23 @@ module.exports.getAllReceptions = (req, res) => {
 };
 
 module.exports.createNewReception = (req, res) => {
-  const tokenParse = tokenVerify(req.headers.token);
+  const { body, headers } = req;
 
-  req.body["idUser"] = tokenParse._id;
+  const tokenParse = tokenVerify(headers.authorization);
 
-  const body = req.body;
-
-  const reception = new Receptions(body);
-
-  if (body.hasOwnProperty('nameUser')
+  const flag = body.hasOwnProperty('nameUser')
     && body.hasOwnProperty('nameDoctor')
     && body.hasOwnProperty('date')
     && body.hasOwnProperty('complaint')
-    && body.hasOwnProperty('idUser')
-    && body.nameUser
-    && body.nameDoctor
-    && body.date
-    && body.complaint
-    && body.idUser) {
+    && body.nameUser !== ''
+    && body.nameDoctor !== ''
+    && body.date !== ''
+    && body.complaint !== '';
+
+  if (flag) {
+    body["idUser"] = tokenParse._id;
+    const reception = new Receptions(body);
+
     reception.save(body).then(() => {
       Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).then(result => {
         res.send({ data: result });
@@ -45,14 +44,13 @@ module.exports.createNewReception = (req, res) => {
 };
 
 module.exports.editReception = (req, res) => {
-  const body = req.body;
-  const headers = req.headers;
+  const { body, headers } = req;
 
   if (body.hasOwnProperty('_id')
-    && headers.hasOwnProperty('token')
-    && body._id
-    && headers.token) {
-    const tokenParse = tokenVerify(headers.token);
+    && headers.hasOwnProperty('authorization')
+    && body._id !== ''
+    && headers.authorization !== '') {
+    const tokenParse = tokenVerify(headers.authorization);
 
     Receptions.updateOne({ _id: body._id }, body).then(() => {
       Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).then(result => {
@@ -65,15 +63,15 @@ module.exports.editReception = (req, res) => {
 };
 
 module.exports.deleteReception = async (req, res) => {
-  const header = req.headers;
+  const { headers } = req;
 
-  if (header.hasOwnProperty('_id')
-    && header.hasOwnProperty('token')
-    && header._id
-    && header.token) {
-    const tokenParse = tokenVerify(header.token);
+  if (headers.hasOwnProperty('_id')
+    && headers.hasOwnProperty('authorization')
+    && headers._id
+    && headers.authorization) {
+    const tokenParse = tokenVerify(headers.authorization);
 
-    Receptions.deleteOne({ _id: header._id }).then(() => {
+    Receptions.deleteOne({ _id: headers._id }).then(() => {
       Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).then(result => {
         res.send({ data: result });
       });

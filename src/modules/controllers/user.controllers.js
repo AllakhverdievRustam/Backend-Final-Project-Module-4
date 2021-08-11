@@ -32,7 +32,7 @@ module.exports.registrationUser = async (req, res) => {
 
     const token = generateJwt(newUser.login, newUser._id);
 
-    res.send(token);
+    res.send({authorization: token});
   } else {
     res.status(422).send('Invalid data entered!');
   }
@@ -53,9 +53,9 @@ module.exports.authorizationUser = async (req, res) => {
       const comparePassword = bcrypt.compareSync(password, candidate.password);
       if (!comparePassword) return res.status(421).send('Wrong password!');
 
-      const token = generateJwt(login, _id);
+      const token = generateJwt(login, candidate._id);
       
-      res.send({ token });
+      res.send({authorization: token});
   } else {
     res.status(422).send('Invalid data entered!');
   }
