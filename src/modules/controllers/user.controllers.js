@@ -55,7 +55,7 @@ module.exports.authorizationUser = async (req, res) => {
 
       const token = generateJwt(login, _id);
       
-      res.send({ token, login: candidate.login, _id: candidate._id });
+      res.send({ token });
   } else {
     res.status(422).send('Invalid data entered!');
   }
