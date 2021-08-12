@@ -63,15 +63,15 @@ module.exports.editReception = (req, res) => {
 };
 
 module.exports.deleteReception = async (req, res) => {
-  const { headers } = req;
+  const { headers, query } = req;
 
-  if (headers.hasOwnProperty('_id')
+  if (query.hasOwnProperty('_id')
     && headers.hasOwnProperty('authorization')
-    && headers._id
+    && query._id
     && headers.authorization) {
     const tokenParse = tokenVerify(headers.authorization);
 
-    Receptions.deleteOne({ _id: headers._id }).then(() => {
+    Receptions.deleteOne({ _id: query._id }).then(() => {
       Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).then(result => {
         res.send({ data: result });
       });
