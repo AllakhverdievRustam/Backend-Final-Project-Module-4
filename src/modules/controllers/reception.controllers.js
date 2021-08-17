@@ -14,12 +14,12 @@ module.exports.getAllReceptions = (req, res) => {
   const offset = +(query.offset);
 
   const startInd = offset * limit;
-  const endInd = startInd + limit;
 
-  Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).then(result => {
-    const lengthResult = result.length;
-    result = result.slice(startInd, endInd);
-    res.send({ data: result, length: lengthResult });
+  Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
+    const lengthResult = resultLength.length;
+    Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
+      res.send({ data: result, length: lengthResult });
+    });
   });
 };
 
