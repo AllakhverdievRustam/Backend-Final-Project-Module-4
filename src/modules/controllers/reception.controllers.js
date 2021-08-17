@@ -8,10 +8,18 @@ const tokenVerify = (token) => {
 }
 
 module.exports.getAllReceptions = (req, res) => {
-  const tokenParse = tokenVerify(req.headers.authorization);
+  const { headers, query } = req;
+  const tokenParse = tokenVerify(headers.authorization);
+  const limit = +(query.limit);
+  const offset = +(query.offset);
+
+  const startInd = offset * limit;
+  const endInd = startInd + limit;
 
   Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).then(result => {
-    res.send({ data: result });
+    const lengthResult = result.length;
+    result = result.slice(startInd, endInd);
+    res.send({ data: result, length: lengthResult });
   });
 };
 
