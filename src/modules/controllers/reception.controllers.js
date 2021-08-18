@@ -17,8 +17,8 @@ module.exports.getAllReceptions = (req, res) => {
     && body.hasOwnProperty('sortDirection')
     && body.hasOwnProperty('firstDate')
     && body.hasOwnProperty('lastDate')
-    && body.limit
-    && body.offset
+    && body.limit !== ''
+    && body.offset !== ''
     && headers.authorization) {
     if (!body.sortLable
       && !body.sortDirection
