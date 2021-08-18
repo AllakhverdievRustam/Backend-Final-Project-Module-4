@@ -7,50 +7,6 @@ const tokenVerify = (token) => {
   return decoded;
 }
 
-const sort = (result, sortLable, sortDirection) => {
-  switch (sortDirection) {
-    case 'asc':
-      result.sort((a, b) =>
-        a[sortLable] < b[sortLable]
-          ? -1
-          : a[sortLable] > b[sortLable]
-            ? 1
-            : 0
-      );
-      break;
-
-    case 'desc':
-      result.sort((a, b) =>
-        a[sortLable] > b[sortLable]
-          ? -1
-          : a[sortLable] < b[sortLable]
-            ? 1
-            : 0
-      );
-      break;
-
-    default:
-      break;
-  }
-
-  return result;
-}
-
-const filter = (result, firstDate, lastDate) => {
-  if (firstDate && !lastDate) {
-    result = result.filter(element => element.date >= firstDate);
-  } else if (!firstDate && lastDate) {
-    result = result.filter(element => element.date <= lastDate);
-  } else if (firstDate && lastDate) {
-    result = result.filter(element =>
-      (element.date >= firstDate) &&
-      (element.date <= lastDate)
-    );
-  }
-
-  return result;
-}
-
 module.exports.getAllReceptions = (req, res) => {
   const { headers, body } = req;
 
@@ -77,9 +33,13 @@ module.exports.getAllReceptions = (req, res) => {
 
       Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
         const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-          res.send({ data: result, length: lengthResult });
-        });
+        Receptions.find(
+          { idUser: tokenParse._id },
+          ['nameUser', 'nameDoctor', 'date', 'complaint'])
+          .skip(startInd).limit(limit)
+          .then(result => {
+            res.send({ data: result, length: lengthResult });
+          });
       });
     } else if (body.sortLable
       && body.sortDirection
@@ -94,11 +54,12 @@ module.exports.getAllReceptions = (req, res) => {
 
       Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
         const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-          result = sort(result, body.sortLable, body.sortDirection);
-
-          res.send({ data: result, length: lengthResult });
-        });
+        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint'])
+          .skip(startInd).limit(limit)
+          .sort({ [body.sortLable]: body.sortDirection === "asc" ? 1 : -1 })
+          .then(result => {
+            res.send({ data: result, length: lengthResult });
+          });
       });
     } else if (!body.sortLable
       && !body.sortDirection) {
@@ -109,18 +70,35 @@ module.exports.getAllReceptions = (req, res) => {
 
       const startInd = offset * limit;
 
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-          result = filter(result, body.firstDate, body.lastDate);
-
-          res.send({ data: result, length: lengthResult });
+      Receptions.find(
+        {
+          $and: [
+            { idUser: tokenParse._id },
+            (body.firstDate && body.lastDate) ? { date: { $gte: body.firstDate, $lte: body.lastDate } }
+              : (body.firstDate && !body.lastDate) ?
+                { date: { $gte: body.firstDate } }
+                : (!body.firstDate && body.lastDate) && { date: { $lte: body.lastDate } }
+          ]
+        }).then(resultLength => {
+          const lengthResult = resultLength.length;
+          Receptions.find(
+            {
+              $and: [
+                { idUser: tokenParse._id },
+                (body.firstDate && body.lastDate) ? { date: { $gte: body.firstDate, $lte: body.lastDate } }
+                  : (body.firstDate && !body.lastDate) ?
+                    { date: { $gte: body.firstDate } }
+                    : (!body.firstDate && body.lastDate) && { date: { $lte: body.lastDate } }
+              ]
+            },
+            ['nameUser', 'nameDoctor', 'date', 'complaint'])
+            .skip(startInd).limit(limit)
+            .then(result => {
+              res.send({ data: result, length: lengthResult });
+            });
         });
-      });
     } else if (body.sortLable
-      && body.sortDirection
-      && body.firstDate
-      && body.lastDate) {
+      && body.sortDirection) {
       const tokenParse = tokenVerify(headers.authorization);
 
       const limit = +(body.limit);
@@ -128,14 +106,20 @@ module.exports.getAllReceptions = (req, res) => {
 
       const startInd = offset * limit;
 
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
+      Receptions.find({ idUser: tokenParse._id, date: { $gte: body.firstDate, $lte: body.lastDate } }).then(resultLength => {
         const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-          result = sort(result, body.sortLable, body.sortDirection);
-          result = filter(result, body.firstDate, body.lastDate);
-
-          res.send({ data: result, length: lengthResult });
-        });
+        console.log(resultLength);
+        Receptions.find(
+          {
+            idUser: tokenParse._id,
+            date: { $gte: body.firstDate, $lte: body.lastDate }
+          },
+          ['nameUser', 'nameDoctor', 'date', 'complaint'])
+          .skip(startInd).limit(limit)
+          .sort({ [body.sortLable]: body.sortDirection === "asc" ? 1 : -1 })
+          .then(result => {
+            res.send({ data: result, length: lengthResult });
+          });
       });
     } else {
       res.status(422).send('Invalid data entered!');
