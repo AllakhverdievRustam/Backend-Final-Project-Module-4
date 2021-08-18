@@ -63,110 +63,83 @@ module.exports.getAllReceptions = (req, res) => {
     && body.hasOwnProperty('lastDate')
     && body.limit
     && body.offset
-    && headers.authorization
-    && !body.sortLable
-    && !body.sortDirection
-    && !body.firstDate
-    && !body.lastDate) {
-    const tokenParse = tokenVerify(headers.authorization);
+    && headers.authorization) {
+    if (!body.sortLable
+      && !body.sortDirection
+      && !body.firstDate
+      && !body.lastDate) {
+      const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(body.limit);
-    const offset = +(body.offset);
+      const limit = +(body.limit);
+      const offset = +(body.offset);
 
-    const startInd = offset * limit;
+      const startInd = offset * limit;
 
-    Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-      const lengthResult = resultLength.length;
-      Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-        res.send({ data: result, length: lengthResult });
+      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
+        const lengthResult = resultLength.length;
+        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
+          res.send({ data: result, length: lengthResult });
+        });
       });
-    });
-  } else if (body.hasOwnProperty('limit')
-    && body.hasOwnProperty('offset')
-    && headers.hasOwnProperty('authorization')
-    && body.hasOwnProperty('sortLable')
-    && body.hasOwnProperty('sortDirection')
-    && body.hasOwnProperty('firstDate')
-    && body.hasOwnProperty('lastDate')
-    && body.limit
-    && body.offset
-    && headers.authorization
-    && body.sortLable
-    && body.sortDirection
-    && !body.firstDate
-    && !body.lastDate) {
-    const tokenParse = tokenVerify(headers.authorization);
+    } else if (body.sortLable
+      && body.sortDirection
+      && !body.firstDate
+      && !body.lastDate) {
+      const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(body.limit);
-    const offset = +(body.offset);
+      const limit = +(body.limit);
+      const offset = +(body.offset);
 
-    const startInd = offset * limit;
+      const startInd = offset * limit;
 
-    Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-      const lengthResult = resultLength.length;
-      Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-        result = sort(result, body.sortLable, body.sortDirection);
-        
-        res.send({ data: result, length: lengthResult });
+      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
+        const lengthResult = resultLength.length;
+        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
+          result = sort(result, body.sortLable, body.sortDirection);
+
+          res.send({ data: result, length: lengthResult });
+        });
       });
-    });
-  } else if (body.hasOwnProperty('limit')
-    && body.hasOwnProperty('offset')
-    && headers.hasOwnProperty('authorization')
-    && body.hasOwnProperty('sortLable')
-    && body.hasOwnProperty('sortDirection')
-    && body.hasOwnProperty('firstDate')
-    && body.hasOwnProperty('lastDate')
-    && body.limit
-    && body.offset
-    && headers.authorization
-    && !body.sortLable
-    && !body.sortDirection) {
-    const tokenParse = tokenVerify(headers.authorization);
+    } else if (!body.sortLable
+      && !body.sortDirection) {
+      const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(body.limit);
-    const offset = +(body.offset);
+      const limit = +(body.limit);
+      const offset = +(body.offset);
 
-    const startInd = offset * limit;
+      const startInd = offset * limit;
 
-    Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-      const lengthResult = resultLength.length;
-      Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-        result = filter(result, body.firstDate, body.lastDate);
+      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
+        const lengthResult = resultLength.length;
+        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
+          result = filter(result, body.firstDate, body.lastDate);
 
-        res.send({ data: result, length: lengthResult });
+          res.send({ data: result, length: lengthResult });
+        });
       });
-    });
-  } else if (body.hasOwnProperty('limit')
-    && body.hasOwnProperty('offset')
-    && headers.hasOwnProperty('authorization')
-    && body.hasOwnProperty('sortLable')
-    && body.hasOwnProperty('sortDirection')
-    && body.hasOwnProperty('firstDate')
-    && body.hasOwnProperty('lastDate')
-    && body.limit
-    && body.offset
-    && headers.authorization
-    && body.sortLable
-    && body.sortDirection
-    && body.firstDate
-    && body.lastDate) {
-    const tokenParse = tokenVerify(headers.authorization);
+    } else if (body.sortLable
+      && body.sortDirection
+      && body.firstDate
+      && body.lastDate) {
+      const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(body.limit);
-    const offset = +(body.offset);
+      const limit = +(body.limit);
+      const offset = +(body.offset);
 
-    const startInd = offset * limit;
+      const startInd = offset * limit;
 
-    Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-      const lengthResult = resultLength.length;
-      Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-        result = sort(result, body.sortLable, body.sortDirection);
-        result = filter(result, body.firstDate, body.lastDate);
+      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
+        const lengthResult = resultLength.length;
+        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
+          result = sort(result, body.sortLable, body.sortDirection);
+          result = filter(result, body.firstDate, body.lastDate);
 
-        res.send({ data: result, length: lengthResult });
+          res.send({ data: result, length: lengthResult });
+        });
       });
-    });
+    } else {
+      res.status(422).send('Invalid data entered!');
+    }
   } else {
     res.status(422).send('Invalid data entered!');
   }
