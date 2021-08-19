@@ -67,15 +67,11 @@ module.exports.createNewReception = (req, res) => {
     && body.hasOwnProperty('nameDoctor')
     && body.hasOwnProperty('date')
     && body.hasOwnProperty('complaint')
-    && body.hasOwnProperty('limit')
-    && body.hasOwnProperty('offset')
     && headers.hasOwnProperty('authorization')
     && body.nameUser
     && body.nameDoctor
     && body.date
     && body.complaint
-    && body.limit !== ''
-    && body.offset !== ''
     && headers.authorization;
 
   if (flag) {
@@ -84,22 +80,13 @@ module.exports.createNewReception = (req, res) => {
     body["idUser"] = tokenParse._id;
     const reception = new Receptions(body);
 
-    const limit = +(body.limit);
-    const offset = +(body.offset);
-
-    const startInd = offset * limit;
-
     reception.save(body).then(() => {
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find(
-          { idUser: tokenParse._id },
-          ['nameUser', 'nameDoctor', 'date', 'complaint'])
-          .skip(startInd).limit(limit)
-          .then(result => {
-          res.send({ data: result, length: lengthResult });
+      Receptions.find(
+        { idUser: tokenParse._id },
+        ['nameUser', 'nameDoctor', 'date', 'complaint'])
+        .then(result => {
+          res.send({ data: result });
         });
-      });
     });
   } else {
     res.status(422).send('Invalid data entered!');
@@ -110,31 +97,18 @@ module.exports.editReception = (req, res) => {
   const { body, headers } = req;
 
   if (body.hasOwnProperty('_id')
-    && body.hasOwnProperty('limit')
-    && body.hasOwnProperty('offset')
     && headers.hasOwnProperty('authorization')
     && body._id
-    && body.limit !== ''
-    && body.offset !== ''
     && headers.authorization) {
     const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(body.limit);
-    const offset = +(body.offset);
-
-    const startInd = offset * limit;
-
     Receptions.updateOne({ _id: body._id }, body).then(() => {
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find(
-          { idUser: tokenParse._id },
-          ['nameUser', 'nameDoctor', 'date', 'complaint'])
-          .skip(startInd).limit(limit)
-          .then(result => {
-          res.send({ data: result, length: lengthResult });
+      Receptions.find(
+        { idUser: tokenParse._id },
+        ['nameUser', 'nameDoctor', 'date', 'complaint'])
+        .then(result => {
+          res.send({ data: result });
         });
-      });
     });
   } else {
     res.status(422).send('Invalid data entered!');
@@ -145,31 +119,18 @@ module.exports.deleteReception = async (req, res) => {
   const { headers, query } = req;
 
   if (query.hasOwnProperty('_id')
-    && query.hasOwnProperty('limit')
-    && query.hasOwnProperty('offset')
     && headers.hasOwnProperty('authorization')
     && query._id
-    && query.limit
-    && query.offset
     && headers.authorization) {
     const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(query.limit);
-    const offset = +(query.offset);
-
-    const startInd = offset * limit;
-
     Receptions.deleteOne({ _id: query._id }).then(() => {
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find(
-          { idUser: tokenParse._id },
-          ['nameUser', 'nameDoctor', 'date', 'complaint'])
-          .skip(startInd).limit(limit)
-          .then(result => {
-          res.send({ data: result, length: lengthResult });
+      Receptions.find(
+        { idUser: tokenParse._id },
+        ['nameUser', 'nameDoctor', 'date', 'complaint'])
+        .then(result => {
+          res.send({ data: result });
         });
-      });
     });
   } else {
     res.status(422).send('Invalid data entered!');
