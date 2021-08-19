@@ -35,8 +35,6 @@ module.exports.getAllReceptions = (req, res) => {
       filterArr.push({ date: { $gte: firstDate } });
     } else if (!firstDate && lastDate) {
       filterArr.push({ date: { $lte: lastDate } });
-    } else {
-      filterArr.push({});
     }
 
     const limitNun = +(limit);
