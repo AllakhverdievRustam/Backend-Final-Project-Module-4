@@ -8,49 +8,67 @@ const tokenVerify = (token) => {
 }
 
 module.exports.getAllReceptions = (req, res) => {
-  const { headers, query } = req;
+  const { headers, body } = req;
+  const { limit, offset, sortLable, sortDirection, firstDate, lastDate } = body;
 
-  if (query.hasOwnProperty('limit')
-    && query.hasOwnProperty('offset')
+  if (body.hasOwnProperty('limit')
+    && body.hasOwnProperty('offset')
     && headers.hasOwnProperty('authorization')
-    && query.limit
-    && query.offset
+    && body.hasOwnProperty('sortLable')
+    && body.hasOwnProperty('sortDirection')
+    && body.hasOwnProperty('firstDate')
+    && body.hasOwnProperty('lastDate')
+    && limit !== ''
+    && offset !== ''
     && headers.authorization) {
     const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(query.limit);
-    const offset = +(query.offset);
+    const sortArr = [];
+    (sortLable && sortDirection)
+      ? sortArr.push({ [sortLable]: sortDirection === "asc" ? 1 : -1 })
+      : sortArr.push({ ["_id"]: 1 })
 
-    const startInd = offset * limit;
+    const filterArr = [{ idUser: tokenParse._id }];
+    if (firstDate && lastDate) {
+      filterArr.push({ date: { $gte: firstDate, $lte: lastDate } });
+    } else if (firstDate && !lastDate) {
+      filterArr.push({ date: { $gte: firstDate } });
+    } else if (!firstDate && lastDate) {
+      filterArr.push({ date: { $lte: lastDate } });
+    }
 
-    Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-      const lengthResult = resultLength.length;
-      Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-        res.send({ data: result, length: lengthResult });
+    const limitNun = +(limit);
+    const startInd = +(offset) * limitNun;
+
+    Receptions.find(
+      { $and: filterArr },
+      ['nameUser', 'nameDoctor', 'date', 'complaint'])
+      .sort(sortArr[0])
+      .skip(startInd).limit(limitNun)
+      .then(result => {
+        Receptions.count(
+          { $and: filterArr })
+          .then(resultCount => {
+            res.send({ data: result, length: resultCount });
+          });
       });
-    });
   } else {
     res.status(422).send('Invalid data entered!');
   }
-
 };
 
 module.exports.createNewReception = (req, res) => {
-  const { body, headers, query } = req;
+  const { body, headers } = req;
 
   const flag = body.hasOwnProperty('nameUser')
     && body.hasOwnProperty('nameDoctor')
     && body.hasOwnProperty('date')
     && body.hasOwnProperty('complaint')
-    && query.hasOwnProperty('limit')
-    && query.hasOwnProperty('offset')
     && headers.hasOwnProperty('authorization')
     && body.nameUser
     && body.nameDoctor
     && body.date
     && body.complaint
-    && query.limit
-    && query.offset
     && headers.authorization;
 
   if (flag) {
@@ -59,18 +77,13 @@ module.exports.createNewReception = (req, res) => {
     body["idUser"] = tokenParse._id;
     const reception = new Receptions(body);
 
-    const limit = +(query.limit);
-    const offset = +(query.offset);
-
-    const startInd = offset * limit;
-
     reception.save(body).then(() => {
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-          res.send({ data: result, length: lengthResult });
+      Receptions.find(
+        { idUser: tokenParse._id },
+        ['nameUser', 'nameDoctor', 'date', 'complaint'])
+        .then(result => {
+          res.send({ data: result });
         });
-      });
     });
   } else {
     res.status(422).send('Invalid data entered!');
@@ -78,30 +91,21 @@ module.exports.createNewReception = (req, res) => {
 };
 
 module.exports.editReception = (req, res) => {
-  const { body, headers, query } = req;
+  const { body, headers } = req;
 
   if (body.hasOwnProperty('_id')
-    && query.hasOwnProperty('limit')
-    && query.hasOwnProperty('offset')
     && headers.hasOwnProperty('authorization')
     && body._id
-    && query.limit
-    && query.offset
     && headers.authorization) {
     const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(query.limit);
-    const offset = +(query.offset);
-
-    const startInd = offset * limit;
-
     Receptions.updateOne({ _id: body._id }, body).then(() => {
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-          res.send({ data: result, length: lengthResult });
+      Receptions.find(
+        { idUser: tokenParse._id },
+        ['nameUser', 'nameDoctor', 'date', 'complaint'])
+        .then(result => {
+          res.send({ data: result });
         });
-      });
     });
   } else {
     res.status(422).send('Invalid data entered!');
@@ -112,27 +116,18 @@ module.exports.deleteReception = async (req, res) => {
   const { headers, query } = req;
 
   if (query.hasOwnProperty('_id')
-    && query.hasOwnProperty('limit')
-    && query.hasOwnProperty('offset')
     && headers.hasOwnProperty('authorization')
     && query._id
-    && query.limit
-    && query.offset
     && headers.authorization) {
     const tokenParse = tokenVerify(headers.authorization);
 
-    const limit = +(query.limit);
-    const offset = +(query.offset);
-
-    const startInd = offset * limit;
-
     Receptions.deleteOne({ _id: query._id }).then(() => {
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
-          res.send({ data: result, length: lengthResult });
+      Receptions.find(
+        { idUser: tokenParse._id },
+        ['nameUser', 'nameDoctor', 'date', 'complaint'])
+        .then(result => {
+          res.send({ data: result });
         });
-      });
     });
   } else {
     res.status(422).send('Invalid data entered!');

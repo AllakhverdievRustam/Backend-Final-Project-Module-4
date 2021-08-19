@@ -22,7 +22,7 @@ const {
   deleteReception
 } = require('../controllers/reception.controllers');
 
-router.get('/getAllReceptions', getAllReceptions);
+router.post('/getAllReceptions', getAllReceptions);
 router.post('/createNewReception', createNewReception);
 router.patch('/editReception', editReception);
 router.delete('/deleteReception', deleteReception);
