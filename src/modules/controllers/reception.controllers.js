@@ -9,6 +9,7 @@ const tokenVerify = (token) => {
 
 module.exports.getAllReceptions = (req, res) => {
   const { headers, body } = req;
+  const { limit, offset, sortLable, sortDirection, firstDate, lastDate } = body;
 
   if (body.hasOwnProperty('limit')
     && body.hasOwnProperty('offset')
@@ -17,113 +18,43 @@ module.exports.getAllReceptions = (req, res) => {
     && body.hasOwnProperty('sortDirection')
     && body.hasOwnProperty('firstDate')
     && body.hasOwnProperty('lastDate')
-    && body.limit !== ''
-    && body.offset !== ''
+    && limit !== ''
+    && offset !== ''
     && headers.authorization) {
-    if (!body.sortLable
-      && !body.sortDirection
-      && !body.firstDate
-      && !body.lastDate) {
-      const tokenParse = tokenVerify(headers.authorization);
+    const tokenParse = tokenVerify(headers.authorization);
 
-      const limit = +(body.limit);
-      const offset = +(body.offset);
+    let sortArr = [];
+    (sortLable && sortDirection)
+      ? sortArr.push({ [sortLable]: sortDirection === "asc" ? 1 : -1 })
+      : sortArr.push({ ["_id"]: 1 })
 
-      const startInd = offset * limit;
+    let filterArr = [{ idUser: tokenParse._id }];
+    (firstDate && lastDate)
+      ? filterArr.push({ date: { $gte: firstDate, $lte: lastDate } })
+      : (firstDate && !lastDate)
+        ? filterArr.push({ date: { $gte: firstDate } })
+        : (!firstDate && lastDate)
+          ? filterArr.push({ date: { $lte: lastDate } })
+          : filterArr.push({});
 
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find(
-          { idUser: tokenParse._id },
-          ['nameUser', 'nameDoctor', 'date', 'complaint'])
-          .skip(startInd).limit(limit)
-          .then(result => {
+    const limitNun = +(limit);
+    const startInd = +(offset) * limitNun;
+
+    let lengthResult = -1;
+
+    Receptions.find(
+      { $and: [filterArr[0], filterArr[1]] },
+      ['nameUser', 'nameDoctor', 'date', 'complaint'])
+      .sort(sortArr[0])
+      .skip(startInd).limit(limitNun)
+      .then(result => {
+        Receptions.count(
+          { $and: [filterArr[0], filterArr[1]] })
+          .then(resultCount => {
+            lengthResult = resultCount;
             res.send({ data: result, length: lengthResult });
           });
       });
-    } else if (body.sortLable
-      && body.sortDirection
-      && !body.firstDate
-      && !body.lastDate) {
-      const tokenParse = tokenVerify(headers.authorization);
-
-      const limit = +(body.limit);
-      const offset = +(body.offset);
-
-      const startInd = offset * limit;
-
-      Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint'])
-          .skip(startInd).limit(limit)
-          .sort({ [body.sortLable]: body.sortDirection === "asc" ? 1 : -1 })
-          .then(result => {
-            res.send({ data: result, length: lengthResult });
-          });
-      });
-    } else if (!body.sortLable
-      && !body.sortDirection) {
-      const tokenParse = tokenVerify(headers.authorization);
-
-      const limit = +(body.limit);
-      const offset = +(body.offset);
-
-      const startInd = offset * limit;
-
-      Receptions.find(
-        {
-          $and: [
-            { idUser: tokenParse._id },
-            (body.firstDate && body.lastDate) ? { date: { $gte: body.firstDate, $lte: body.lastDate } }
-              : (body.firstDate && !body.lastDate) ?
-                { date: { $gte: body.firstDate } }
-                : (!body.firstDate && body.lastDate) && { date: { $lte: body.lastDate } }
-          ]
-        }).then(resultLength => {
-          const lengthResult = resultLength.length;
-          Receptions.find(
-            {
-              $and: [
-                { idUser: tokenParse._id },
-                (body.firstDate && body.lastDate) ? { date: { $gte: body.firstDate, $lte: body.lastDate } }
-                  : (body.firstDate && !body.lastDate) ?
-                    { date: { $gte: body.firstDate } }
-                    : (!body.firstDate && body.lastDate) && { date: { $lte: body.lastDate } }
-              ]
-            },
-            ['nameUser', 'nameDoctor', 'date', 'complaint'])
-            .skip(startInd).limit(limit)
-            .then(result => {
-              res.send({ data: result, length: lengthResult });
-            });
-        });
-    } else if (body.sortLable
-      && body.sortDirection) {
-      const tokenParse = tokenVerify(headers.authorization);
-
-      const limit = +(body.limit);
-      const offset = +(body.offset);
-
-      const startInd = offset * limit;
-
-      Receptions.find({ idUser: tokenParse._id, date: { $gte: body.firstDate, $lte: body.lastDate } }).then(resultLength => {
-        const lengthResult = resultLength.length;
-        console.log(resultLength);
-        Receptions.find(
-          {
-            idUser: tokenParse._id,
-            date: { $gte: body.firstDate, $lte: body.lastDate }
-          },
-          ['nameUser', 'nameDoctor', 'date', 'complaint'])
-          .skip(startInd).limit(limit)
-          .sort({ [body.sortLable]: body.sortDirection === "asc" ? 1 : -1 })
-          .then(result => {
-            res.send({ data: result, length: lengthResult });
-          });
-      });
-    } else {
-      res.status(422).send('Invalid data entered!');
-    }
   } else {
     res.status(422).send('Invalid data entered!');
   }
@@ -143,8 +74,8 @@ module.exports.createNewReception = (req, res) => {
     && body.nameDoctor
     && body.date
     && body.complaint
-    && body.limit
-    && body.offset
+    && body.limit !== ''
+    && body.offset !== ''
     && headers.authorization;
 
   if (flag) {
@@ -161,7 +92,11 @@ module.exports.createNewReception = (req, res) => {
     reception.save(body).then(() => {
       Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
         const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
+        Receptions.find(
+          { idUser: tokenParse._id },
+          ['nameUser', 'nameDoctor', 'date', 'complaint'])
+          .skip(startInd).limit(limit)
+          .then(result => {
           res.send({ data: result, length: lengthResult });
         });
       });
@@ -179,8 +114,8 @@ module.exports.editReception = (req, res) => {
     && body.hasOwnProperty('offset')
     && headers.hasOwnProperty('authorization')
     && body._id
-    && body.limit
-    && body.offset
+    && body.limit !== ''
+    && body.offset !== ''
     && headers.authorization) {
     const tokenParse = tokenVerify(headers.authorization);
 
@@ -192,7 +127,11 @@ module.exports.editReception = (req, res) => {
     Receptions.updateOne({ _id: body._id }, body).then(() => {
       Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
         const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
+        Receptions.find(
+          { idUser: tokenParse._id },
+          ['nameUser', 'nameDoctor', 'date', 'complaint'])
+          .skip(startInd).limit(limit)
+          .then(result => {
           res.send({ data: result, length: lengthResult });
         });
       });
@@ -223,7 +162,11 @@ module.exports.deleteReception = async (req, res) => {
     Receptions.deleteOne({ _id: query._id }).then(() => {
       Receptions.find({ idUser: tokenParse._id }).then(resultLength => {
         const lengthResult = resultLength.length;
-        Receptions.find({ idUser: tokenParse._id }, ['nameUser', 'nameDoctor', 'date', 'complaint']).skip(startInd).limit(limit).then(result => {
+        Receptions.find(
+          { idUser: tokenParse._id },
+          ['nameUser', 'nameDoctor', 'date', 'complaint'])
+          .skip(startInd).limit(limit)
+          .then(result => {
           res.send({ data: result, length: lengthResult });
         });
       });
