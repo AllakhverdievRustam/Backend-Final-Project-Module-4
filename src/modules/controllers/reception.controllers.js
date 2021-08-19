@@ -23,36 +23,35 @@ module.exports.getAllReceptions = (req, res) => {
     && headers.authorization) {
     const tokenParse = tokenVerify(headers.authorization);
 
-    let sortArr = [];
+    const sortArr = [];
     (sortLable && sortDirection)
       ? sortArr.push({ [sortLable]: sortDirection === "asc" ? 1 : -1 })
       : sortArr.push({ ["_id"]: 1 })
 
-    let filterArr = [{ idUser: tokenParse._id }];
-    (firstDate && lastDate)
-      ? filterArr.push({ date: { $gte: firstDate, $lte: lastDate } })
-      : (firstDate && !lastDate)
-        ? filterArr.push({ date: { $gte: firstDate } })
-        : (!firstDate && lastDate)
-          ? filterArr.push({ date: { $lte: lastDate } })
-          : filterArr.push({});
+    const filterArr = [{ idUser: tokenParse._id }];
+    if (firstDate && lastDate) {
+      filterArr.push({ date: { $gte: firstDate, $lte: lastDate } });
+    } else if (firstDate && !lastDate) {
+      filterArr.push({ date: { $gte: firstDate } });
+    } else if (!firstDate && lastDate) {
+      filterArr.push({ date: { $lte: lastDate } });
+    } else {
+      filterArr.push({});
+    }
 
     const limitNun = +(limit);
     const startInd = +(offset) * limitNun;
 
-    let lengthResult = -1;
-
     Receptions.find(
-      { $and: [filterArr[0], filterArr[1]] },
+      { $and: filterArr },
       ['nameUser', 'nameDoctor', 'date', 'complaint'])
       .sort(sortArr[0])
       .skip(startInd).limit(limitNun)
       .then(result => {
         Receptions.count(
-          { $and: [filterArr[0], filterArr[1]] })
+          { $and: filterArr })
           .then(resultCount => {
-            lengthResult = resultCount;
-            res.send({ data: result, length: lengthResult });
+            res.send({ data: result, length: resultCount });
           });
       });
   } else {
