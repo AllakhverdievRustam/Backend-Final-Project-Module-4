@@ -23,7 +23,7 @@ module.exports.registrationUser = async (req, res) => {
 
     const candidate = await Users.findOne({ login: body.login });
     if (candidate) return res.status(421).send('This user already exists!');
-    
+
     const hashPassword = await bcrypt.hash(password, 5);
 
     const newUser = await Users.create({ login: login, password: hashPassword });
@@ -32,7 +32,7 @@ module.exports.registrationUser = async (req, res) => {
 
     const token = generateJwt(newUser.login, newUser._id);
 
-    res.send({authorization: token});
+    res.send({ authorization: token });
   } else {
     res.status(422).send('Invalid data entered!');
   }
@@ -47,15 +47,15 @@ module.exports.authorizationUser = async (req, res) => {
     && login
     && body.hasOwnProperty('password')
     && password) {
-      const candidate = await Users.findOne({ login });
-      if (!candidate) return res.status(420).send('Such user does not exist!');
-      
-      const comparePassword = bcrypt.compareSync(password, candidate.password);
-      if (!comparePassword) return res.status(421).send('Wrong password!');
+    const candidate = await Users.findOne({ login });
+    if (!candidate) return res.status(420).send('Such user does not exist!');
 
-      const token = generateJwt(login, candidate._id);
-      
-      res.send({authorization: token});
+    const comparePassword = bcrypt.compareSync(password, candidate.password);
+    if (!comparePassword) return res.status(421).send('Wrong password!');
+
+    const token = generateJwt(login, candidate._id);
+
+    res.send({ authorization: token });
   } else {
     res.status(422).send('Invalid data entered!');
   }

@@ -61,7 +61,7 @@ module.exports.getAllReceptions = (req, res) => {
 module.exports.createNewReception = (req, res) => {
   const { body, headers } = req;
   const { limit, offset, sortLable, sortDirection, firstDate, lastDate } = body;
-
+  
   const flag = body.hasOwnProperty('nameUser')
     && body.hasOwnProperty('nameDoctor')
     && body.hasOwnProperty('date')
@@ -193,8 +193,8 @@ module.exports.deleteReception = async (req, res) => {
     && offset !== ''
     && _id
     && headers.authorization
-    ) {
-    
+  ) {
+
     const tokenParse = tokenVerify(headers.authorization);
 
     const sortArr = [];
