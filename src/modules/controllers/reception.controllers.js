@@ -1,6 +1,5 @@
 const Receptions = require('../../db/models/receptions/Index');
 const jwt = require('jsonwebtoken');
-const { query } = require('express');
 
 SECRET_KEY = 'Rustam4ik228322';
 const tokenVerify = (token) => {
