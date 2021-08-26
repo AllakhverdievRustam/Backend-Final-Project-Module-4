@@ -13,10 +13,7 @@ const generateJwt = (login, _id) => {
   )
 }
 
-const tokenVerify = (token) => {
-  const decoded = jwt.verify(token, SECRET_KEY);
-  return decoded;
-}
+const tokenVerify = async (token) => await jwt.verify(token, SECRET_KEY);
 
 // Registration
 module.exports.registrationUser = async (req, res) => {
@@ -90,9 +87,8 @@ module.exports.changeUser = async (req, res) => {
 
     const tokenParse = tokenVerify(headers.authorization);
 
-    Users.updateOne({ _id: tokenParse._id }, { imgName: fileName }).then();
-
-    res.send({ image: fileName });
+    Users.updateOne({ _id: tokenParse._id }, { imgName: fileName })
+      .then(res.send({ image: fileName }));
   } else {
     res.status(422).send('Invalid data entered!');
   }
