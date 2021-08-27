@@ -13,10 +13,31 @@ const generateJwt = (login, _id) => {
   )
 }
 
-const tokenVerify = async (token) => await jwt.verify(token, SECRET_KEY);
+const tokenVerify = (token) => jwt.verify(token, SECRET_KEY);
 
 // Registration
 module.exports.registrationUser = async (req, res) => {
+
+  // #swagger.tags = ['users']
+
+  /* #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      type: 'object',
+      schema: { $ref: "#/definitions/usersReg" }
+  } */
+
+  /* #swagger.responses[421] = {
+      description: 'This user already exists!' 
+     }
+  */
+
+  /* #swagger.responses[422] = { 
+      schema: { $ref: "#/definitions/usersReg" },
+      description: 'Invalid data entered!' 
+    }
+  */
+
   const body = req.body;
   const { login, password, imgName } = body;
 
@@ -48,6 +69,32 @@ module.exports.registrationUser = async (req, res) => {
 
 // Authorization
 module.exports.authorizationUser = async (req, res) => {
+
+  // #swagger.tags = ['users']
+
+  /* #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      type: 'object',
+      schema: { $ref: "#/definitions/usersAuth" }
+  } */
+
+  /* #swagger.responses[420] = { 
+      description: 'Such user does not exist!' 
+     }
+  */
+
+  /* #swagger.responses[421] = {
+       description: 'Wrong password!' 
+      }
+   */
+
+  /* #swagger.responses[422] = { 
+       schema: { $ref: "#/definitions/usersAuth" },
+       description: 'Invalid data entered!' 
+      }
+   */
+
   const body = req.body;
   const { login, password } = body;
 
@@ -71,6 +118,27 @@ module.exports.authorizationUser = async (req, res) => {
 
 // Add image to user
 module.exports.changeUser = async (req, res) => {
+
+  // #swagger.tags = ['users']
+
+  /* #swagger.parameters['img'] = {
+      in: 'formData',
+      required: true,
+      type: 'file'
+  } */
+
+  /* #swagger.parameters['authorization'] = {
+      in: 'header',
+      required: true,
+      type: 'string'
+  } */
+
+  /* #swagger.responses[421] = { 
+       schema: { img: "", authorization: "" },
+       description: 'Invalid data entered!' 
+      }
+   */
+
   const { headers, files } = req;
 
   if (files.hasOwnProperty('img')
@@ -97,12 +165,24 @@ module.exports.changeUser = async (req, res) => {
 // -----------------------------------------------------------
 
 module.exports.getAllUser = (req, res) => {
+
+  // #swagger.tags = ['users']
+
   Users.find().then(result => {
     res.send({ data: result });
   });
 };
 
 module.exports.deleteUser = (req, res) => {
+
+  // #swagger.tags = ['users']
+
+  /* #swagger.responses[421] = { 
+       schema: { _id: "" },
+       description: 'Invalid data entered!' 
+      }
+   */
+
   if (req.query._id) {
     Users.deleteOne({ _id: req.query._id }).then(() => {
       res.send('User deleted successfully!');

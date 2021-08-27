@@ -8,6 +8,28 @@ const tokenVerify = (token) => {
 }
 
 module.exports.getAllReceptions = (req, res) => {
+
+  // #swagger.tags = ['receptions']
+
+  /* #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      type: 'object',
+      schema: { $ref: "#/definitions/paramsGetAllReceptions" }
+  } */
+
+  /* #swagger.parameters['authorization'] = {
+      in: 'header',
+      required: true,
+      type: 'string'
+  } */
+
+  /* #swagger.responses[422] = { 
+       schema: { $ref: "#/definitions/paramsGetAllReceptions" },
+       description: 'Invalid data entered!' 
+      }
+   */
+
   const { headers, body } = req;
   const { limit, offset, sortLable, sortDirection, firstDate, lastDate } = body;
 
@@ -58,6 +80,28 @@ module.exports.getAllReceptions = (req, res) => {
 };
 
 module.exports.createNewReception = (req, res) => {
+
+  // #swagger.tags = ['receptions']
+
+  /* #swagger.parameters['body'] = {
+        in: 'body',
+        required: true,
+        type: 'object',
+        schema: { $ref: "#/definitions/paramsCreateNewReceptions" }
+    } */
+
+  /* #swagger.parameters['authorization'] = {
+      in: 'header',
+      required: true,
+      type: 'string'
+  } */
+
+  /* #swagger.responses[422] = { 
+       schema: { $ref: "#/definitions/paramsCreateNewReceptions" },
+       description: 'Invalid data entered!' 
+      }
+   */
+
   const { body, headers } = req;
   const { limit, offset, sortLable, sortDirection, firstDate, lastDate } = body;
 
@@ -123,6 +167,28 @@ module.exports.createNewReception = (req, res) => {
 };
 
 module.exports.editReception = (req, res) => {
+
+  // #swagger.tags = ['receptions']
+
+  /* #swagger.parameters['body'] = {
+        in: 'body',
+        required: true,
+        type: 'object',
+        schema: { $ref: "#/definitions/paramsEditReceptions" }
+    } */
+
+  /* #swagger.parameters['authorization'] = {
+      in: 'header',
+      required: true,
+      type: 'string'
+  } */
+
+  /* #swagger.responses[422] = { 
+       schema: { $ref: "#/definitions/paramsEditReceptions" },
+       description: 'Invalid data entered!' 
+      }
+   */
+
   const { body, headers } = req;
   const { limit, offset, sortLable, sortDirection, firstDate, lastDate } = body;
 
@@ -177,6 +243,62 @@ module.exports.editReception = (req, res) => {
 };
 
 module.exports.deleteReception = async (req, res) => {
+
+  // #swagger.tags = ['receptions']
+
+  /* #swagger.parameters['limit'] = {
+    in: 'query',
+    required: true,
+    type: 'string',
+    value: '5'
+  } */
+  /* #swagger.parameters['offset'] = {
+    in: 'query',
+    required: true,
+    type: 'string',
+    value: '0'
+  } */
+  /* #swagger.parameters['sortLable'] = {
+    in: 'query',
+    required: true,
+    type: 'string',
+    value: 'nameDoctor'
+  } */
+  /* #swagger.parameters['sortDirection'] = {
+    in: 'query',
+    required: true,
+    type: 'string',
+    value: 'asc/desc'
+  } */
+  /* #swagger.parameters['firstDate'] = {
+    in: 'query',
+    required: true,
+    type: 'string',
+    value: '2021-08-01'
+  } */
+  /* #swagger.parameters['lastDate'] = {
+    in: 'query',
+    required: true,
+    type: 'string',
+    value: '2021-08-31'
+  } */
+  /* #swagger.parameters['_id'] = {
+    in: 'query',
+    required: true,
+    type: 'string'
+  } */
+
+  /* #swagger.parameters['authorization'] = {
+      in: 'header',
+      required: true,
+      type: 'string'
+  } */
+
+  /* #swagger.responses[422] = {
+       description: 'Invalid data entered!' 
+      }
+   */
+
   const { headers, query } = req;
   const { limit, offset, sortLable, sortDirection, firstDate, lastDate, _id } = query;
 
