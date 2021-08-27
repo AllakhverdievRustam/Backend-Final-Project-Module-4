@@ -7,12 +7,14 @@ const {
   registrationUser,
   deleteUser,
   authorizationUser,
+  changeUser
 } = require('../controllers/user.controllers');
 
 router.get('/getAllUser', getAllUser);
 router.post('/registrationUser', registrationUser);
 router.post('/authorizationUser', authorizationUser);
 router.delete('/deleteUser', deleteUser);
+router.patch('/changeUser', changeUser);
 
 
 const {
